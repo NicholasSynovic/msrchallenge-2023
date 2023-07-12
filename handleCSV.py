@@ -1,10 +1,13 @@
-from pandas import DataFrame
-from progress.spinner import Spinner
-from pandas.io.parsers.readers import TextFileReader
-import pandas
 from os import mkdir
 from pathlib import Path
-from pprint import pprint as print
+from typing import List
+
+import pandas
+from pandas import DataFrame, Series
+from pandas.io.parsers.readers import TextFileReader
+from progress.bar import Bar
+from progress.spinner import Spinner
+
 
 def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
     try:
@@ -13,7 +16,7 @@ def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
         pass
 
     counter: int = 0
-    
+
     with Spinner(f"Splitting CSV into chunks stored in ./{outputDir}... ") as spinner:
         df: DataFrame
         for df in tfr:
@@ -23,23 +26,86 @@ def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
 
             spinner.next()
 
-def extractRelevantInformation(df: DataFrame)   ->  DataFrame:
-    df.drop(["repository", "match", "from_or_import", "method", "file"], axis=1, inplace=True,)
+
+def extractRelevantInformation(df: DataFrame) -> DataFrame:
+    df.drop(
+        ["repository", "match", "from_or_import", "method", "file"],
+        axis=1,
+        inplace=True,
+    )
     return df
 
 
-def main()  ->  None:
-    tfr: TextFileReader = pandas.read_csv(filepath_or_buffer="githubRepositoriesThatUseTransformersLibrary.csv", chunksize=1000)
+def readModelList(filePath: str) -> List[str]:
+    with open(file=filePath) as file:
+        lines: List[str] = file.readlines()
+        file.close()
+
+    lines: List[str] = [line.strip().replace('"', "") for line in lines]
+    return lines
+
+
+def countContainedModels(
+    df: DataFrame,
+    modelList: List[str],
+    message: str,
+    maxBarLen: int,
+) -> dict[str, int]:
+    data: dict[str, int] = {}
+
+    with Bar(message, max=maxBarLen) as bar:
+        model: str
+        for model in modelList:
+            validRows: DataFrame = df[df["param_hardcoded"].str.contains(model) == True]
+
+            if validRows.empty:
+                bar.next()
+                continue
+
+            relevantColumn: Series = validRows["param_hardcoded"]
+            exactData: Series = relevantColumn == model
+            exactData: Series = exactData[exactData]
+
+            if exactData.empty:
+                bar.next()
+                continue
+
+            data[model] = len(exactData)
+            bar.next()
+
+    return data
+
+
+def main() -> None:
+    modelListFile: str = "ptmTorrentV1FileList.txt"
+    largeCSV: str = "githubRepositoriesThatUseTransformersLibrary.csv"
+    dfCounter: int = 0
+
+    tfr: TextFileReader = pandas.read_csv(filepath_or_buffer=largeCSV, chunksize=1000)
+
+    modelList: List[str] = readModelList(filePath=modelListFile)
+    modelListLength: int = len(modelList)
 
     # largeCSVSplitOutputDir: Path = Path("csvStorage")
     # splitCSV(tfr=tfr, outputDir=largeCSVSplitOutputDir)
 
     df: DataFrame
     for df in tfr:
-        df = extractRelevantInformation(df=df)
-        print(df["param_hardcoded"])
-        quit()
-    
+        df: DataFrame = extractRelevantInformation(df=df)
+        df["param_hardcoded"] = df["param_hardcoded"].str.replace(
+            r"[^a-zA-Z0-9-/]",
+            "",
+            regex=True,
+        )
+
+        countContainedModels(
+            df,
+            modelList,
+            message=f"Counting models used in DataFrame {dfCounter}...",
+            maxBarLen=modelListLength,
+        )
+        dfCounter += 1
+
 
 if __name__ == "__main__":
     main()
