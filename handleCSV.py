@@ -4,6 +4,7 @@ from pandas.io.parsers.readers import TextFileReader
 import pandas
 from os import mkdir
 from pathlib import Path
+from pprint import pprint as print
 
 def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
     try:
@@ -22,14 +23,23 @@ def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
 
             spinner.next()
 
+def extractRelevantInformation(df: DataFrame)   ->  DataFrame:
+    df.drop(["repository", "match", "from_or_import", "method", "file"], axis=1, inplace=True,)
+    return df
+
 
 def main()  ->  None:
-    largeCSVSplitOutputDir: Path = Path("csvStorage")
-
     tfr: TextFileReader = pandas.read_csv(filepath_or_buffer="githubRepositoriesThatUseTransformersLibrary.csv", chunksize=1000)
 
-    splitCSV(tfr=tfr, outputDir=largeCSVSplitOutputDir)
+    # largeCSVSplitOutputDir: Path = Path("csvStorage")
+    # splitCSV(tfr=tfr, outputDir=largeCSVSplitOutputDir)
 
+    df: DataFrame
+    for df in tfr:
+        df = extractRelevantInformation(df=df)
+        print(df["param_hardcoded"])
+        quit()
+    
 
 if __name__ == "__main__":
     main()
