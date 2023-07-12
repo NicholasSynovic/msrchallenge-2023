@@ -1,4 +1,6 @@
 torch
+progress
 torchvision
 torchaudio
 torchtext
+pandas
