@@ -7,6 +7,8 @@ from pandas import DataFrame, Series
 from pandas.io.parsers.readers import TextFileReader
 from progress.bar import Bar
 from progress.spinner import Spinner
+from argparse import ArgumentParser, Namespace
+from json import dump
 
 
 def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
@@ -75,36 +77,46 @@ def countContainedModels(
 
     return data
 
+def getArgs()   ->  Namespace:
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument("-i", "--input", required=True, help="A CSV file to read",)
+    parser.add_argument("-o", "--output", required=True, help="A JSON file to dump data",)
+    return parser.parse_args()
+
 
 def main() -> None:
-    modelListFile: str = "ptmTorrentV1FileList.txt"
-    largeCSV: str = "githubRepositoriesThatUseTransformersLibrary.csv"
-    dfCounter: int = 0
+    args: Namespace = getArgs()
 
-    tfr: TextFileReader = pandas.read_csv(filepath_or_buffer=largeCSV, chunksize=1000)
+    modelListFile: str = "ptmTorrentV1FileList.txt"
 
     modelList: List[str] = readModelList(filePath=modelListFile)
     modelListLength: int = len(modelList)
 
+    # largeCSV: str = "githubRepositoriesThatUseTransformersLibrary.csv"
+    # tfr: TextFileReader = pandas.read_csv(filepath_or_buffer=largeCSV, chunksize=1000)
     # largeCSVSplitOutputDir: Path = Path("csvStorage")
     # splitCSV(tfr=tfr, outputDir=largeCSVSplitOutputDir)
 
-    df: DataFrame
-    for df in tfr:
-        df: DataFrame = extractRelevantInformation(df=df)
-        df["param_hardcoded"] = df["param_hardcoded"].str.replace(
-            r"[^a-zA-Z0-9-/]",
-            "",
-            regex=True,
-        )
+    # df: DataFrame
+    # for df in tfr:
+    df: DataFrame = pandas.read_csv(filepath_or_buffer=args.input)
+    df: DataFrame = extractRelevantInformation(df=df)
+    df["param_hardcoded"] = df["param_hardcoded"].str.replace(
+        r"[^a-zA-Z0-9-/]",
+        "",
+        regex=True,
+    )
 
-        countContainedModels(
-            df,
-            modelList,
-            message=f"Counting models used in DataFrame {dfCounter}...",
-            maxBarLen=modelListLength,
-        )
-        dfCounter += 1
+    data: dict[str, int] = countContainedModels(
+        df,
+        modelList,
+        message=f"Counting models used in {args.input} ...",
+        maxBarLen=modelListLength,
+    )
+
+    with open(args.output, "w") as output:
+        dump(obj=data, fp=output, indent=4)
+        output.close()
 
 
 if __name__ == "__main__":
