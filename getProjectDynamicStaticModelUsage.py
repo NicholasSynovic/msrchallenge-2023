@@ -1,26 +1,29 @@
-from pandas import DataFrame, Series
-import pandas
-# from pprint import pprint as print
 from typing import Hashable
+
+import pandas
+from pandas import DataFrame, Series
 from pandas.core.groupby.generic import DataFrameGroupBy
 from progress.bar import Bar
 
 
-def strReplacement(series: Series)   ->  Series:
+def strReplacement(series: Series) -> Series:
     series = series.str.replace(
-            r"[^a-zA-Z0-9\-\_\/]",
-            "",
-            regex=True,
-            )
+        r"[^a-zA-Z0-9\-\_\/]",
+        "",
+        regex=True,
+    )
 
     return series
 
-def groupByRepository(df: DataFrame)    ->  DataFrameGroupBy:
+
+def groupByRepository(df: DataFrame) -> DataFrameGroupBy:
     dfgb: DataFrameGroupBy = df.groupby(by=["repository"])
     return dfgb
 
 
-def countDynamicModelUsageRepositories(dfgb: DataFrameGroupBy)  ->  tuple[int, int, int, int, float, float, float, float]:
+def countDynamicModelUsageRepositories(
+    dfgb: DataFrameGroupBy,
+) -> tuple[int, int, int, int, float, float, float, float]:
     """
     Returns a tuple in this order:
         [
@@ -61,15 +64,28 @@ def countDynamicModelUsageRepositories(dfgb: DataFrameGroupBy)  ->  tuple[int, i
 
             bar.next()
 
-
     percentDynamicUsage: float = (dynamicUsageRepos / totalNumberOfRepos) * 100
     percentStaticUsage: float = (staticUsageRepos / totalNumberOfRepos) * 100
-    percentPureStaticUsage_total: float = (pureStaticUsageRepos / totalNumberOfRepos) * 100
-    percentPureStaticUsage_partial: float = (pureStaticUsageRepos / staticUsageRepos) * 100
+    percentPureStaticUsage_total: float = (
+        pureStaticUsageRepos / totalNumberOfRepos
+    ) * 100
+    percentPureStaticUsage_partial: float = (
+        pureStaticUsageRepos / staticUsageRepos
+    ) * 100
 
-    return (totalNumberOfRepos, dynamicUsageRepos, staticUsageRepos, pureStaticUsageRepos, percentDynamicUsage, percentStaticUsage, percentPureStaticUsage_total, percentPureStaticUsage_partial,)
+    return (
+        totalNumberOfRepos,
+        dynamicUsageRepos,
+        staticUsageRepos,
+        pureStaticUsageRepos,
+        percentDynamicUsage,
+        percentStaticUsage,
+        percentPureStaticUsage_total,
+        percentPureStaticUsage_partial,
+    )
 
-def main()  ->  None:
+
+def main() -> None:
     csvFile: str = "githubRepositoriesThatUseTransformersLibrary.csv"
 
     df: DataFrame = pandas.read_csv(filepath_or_buffer=csvFile)
@@ -77,8 +93,10 @@ def main()  ->  None:
     df["param_hardcoded"] = strReplacement(series=df["param_hardcoded"])
 
     dfgb: DataFrameGroupBy = groupByRepository(df=df)
-    
-    data: tuple[int, int, int, float, float] = countDynamicModelUsageRepositories(dfgb=dfgb)
+
+    data: tuple[int, int, int, float, float] = countDynamicModelUsageRepositories(
+        dfgb=dfgb
+    )
 
     print(data)
 

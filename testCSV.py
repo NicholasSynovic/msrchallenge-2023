@@ -1,5 +1,6 @@
-import pandas
 import time
+
+import pandas
 
 csvFile: str = "githubRepositoriesThatUseTransformersLibrary.csv"
 

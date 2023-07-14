@@ -1,5 +1,8 @@
+from argparse import ArgumentParser, Namespace
+from json import dump
 from os import mkdir
 from pathlib import Path
+from pprint import pprint as print
 from typing import List
 
 import pandas
@@ -7,9 +10,7 @@ from pandas import DataFrame, Series
 from pandas.io.parsers.readers import TextFileReader
 from progress.bar import Bar
 from progress.spinner import Spinner
-from argparse import ArgumentParser, Namespace
-from json import dump
-from pprint import pprint as print
+
 
 def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
     try:
@@ -77,10 +78,21 @@ def countContainedModels(
 
     return data
 
-def getArgs()   ->  Namespace:
+
+def getArgs() -> Namespace:
     parser: ArgumentParser = ArgumentParser()
-    parser.add_argument("-i", "--input", required=True, help="A CSV file to read",)
-    parser.add_argument("-o", "--output", required=True, help="A JSON file to dump data",)
+    parser.add_argument(
+        "-i",
+        "--input",
+        required=True,
+        help="A CSV file to read",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        help="A JSON file to dump data",
+    )
     return parser.parse_args()
 
 
