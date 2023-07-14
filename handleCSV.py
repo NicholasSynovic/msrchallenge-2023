@@ -9,7 +9,7 @@ from progress.bar import Bar
 from progress.spinner import Spinner
 from argparse import ArgumentParser, Namespace
 from json import dump
-
+from pprint import pprint as print
 
 def splitCSV(tfr: TextFileReader, outputDir: Path) -> None:
     try:
@@ -101,6 +101,10 @@ def main() -> None:
     # for df in tfr:
     df: DataFrame = pandas.read_csv(filepath_or_buffer=args.input)
     df: DataFrame = extractRelevantInformation(df=df)
+
+    print(df["param_hardcoded"].to_list())
+    quit()
+
     df["param_hardcoded"] = df["param_hardcoded"].str.replace(
         r"[^a-zA-Z0-9-/]",
         "",
