@@ -1,14 +1,13 @@
-from typing import Hashable
+from argparse import ArgumentParser, Namespace
+from os import listdir
+from os.path import isdir
+from pathlib import Path
+from typing import Hashable, List
 
 import pandas
 from pandas import DataFrame, Series
 from pandas.core.groupby.generic import DataFrameGroupBy
 from progress.bar import Bar
-from argparse import Namespace, ArgumentParser
-from pathlib import Path
-from os import listdir
-from os.path import isdir
-from typing import List
 
 
 def getArgs() -> Namespace:
@@ -105,7 +104,7 @@ def countDynamicModelUsageRepositories(
     percentPureStaticUsage_total: float = (
         pureStaticUsageRepos / totalNumberOfRepos
     ) * 100
-    
+
     try:
         percentPureStaticUsage_partial: float = (
             pureStaticUsageRepos / staticUsageRepos
@@ -150,7 +149,7 @@ def main() -> None:
             df: DataFrame = pandas.read_csv(filepath_or_buffer=file)
             df["param_hardcoded"] = strReplacement(series=df["param_hardcoded"])
             dfgb: DataFrameGroupBy = groupByRepository(df=df)
-    
+
             data: tuple[
                 int, int, int, int, float, float, float, float
             ] = countDynamicModelUsageRepositories(dfgb=dfgb)
