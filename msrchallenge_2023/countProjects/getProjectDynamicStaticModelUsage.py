@@ -166,8 +166,8 @@ def main() -> None:
         df: DataFrame = DataFrame(data=dataDict).sort_values(
             by="projectCount", ignore_index=True
         )
-
-        print(df)
+        
+        df.to_csv(path_or_buf=args.output, index=False)
 
     else:
         csvFile: str = args.input
