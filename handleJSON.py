@@ -1,4 +1,4 @@
-from pandas import DataFrame
+from pandas import DataFrame, Series
 import pandas
 from argparse import ArgumentParser, Namespace
 
@@ -10,6 +10,8 @@ from typing import List
 import pandas
 from progress.bar import Bar
 from matplotlib import pyplot as plt
+import numpy
+from pprint import pprint as print
 
 def getArgs()   ->  Namespace:
     parser: ArgumentParser = ArgumentParser()
@@ -17,6 +19,8 @@ def getArgs()   ->  Namespace:
     parser.add_argument("-o", "--output", required=True, help="A JSON file to dump data",)
     return parser.parse_args()
 
+def toNone(x)   ->  None:
+    return None
 
 def main() -> None:
     args: Namespace = getArgs()
@@ -36,13 +40,26 @@ def main() -> None:
     df: DataFrame = pandas.concat(objs=dfList, ignore_index=True)
     
     newDF: DataFrame = df.groupby(by=["repo"]).aggregate(func={"calls": "sum"}).reset_index()
-    modelCount: int = newDF["repo"].size
+    newDF.sort_values(by="calls", ignore_index=True, inplace=True)
 
-
-    newDF.hist()
-    plt.savefig("test.png")
+    top15: DataFrame = newDF.tail(n=15)
     
-    print(modelCount)
+    top15.plot(kind="bar", x="repo", y="calls", logy=True, legend=None)
+    plt.ylabel(ylabel="# of Projects Using Model")
+    plt.xlabel(xlabel="Model Name")
+    plt.xticks(rotation=45, ha="right")
+    plt.title(label="Top 15 Models Used in Projects")
+
+    ax = plt.gca()
+    bars = ax.bar(top15["repo"], top15["calls"])
+
+    for bar in bars:
+        height = bar.get_height()
+        ax.annotate(f'{height}', xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 1), fontsize="xx-small", textcoords='offset points', ha='center', va='bottom')
+
+    plt.tight_layout()
+    plt.savefig("test.pdf")
 
 if __name__ == "__main__":
     main()
