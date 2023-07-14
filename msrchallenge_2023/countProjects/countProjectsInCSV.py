@@ -1,9 +1,15 @@
 from argparse import ArgumentParser, Namespace
-from typing import Path
+from os import listdir
+from os.path import isdir
+from pathlib import Path
+from typing import List
 
 import pandas
+from matplotlib import pyplot as plt
 from pandas import DataFrame
 from pandas.core.groupby.generic import DataFrameGroupBy
+from pandas.errors import ParserError
+from progress.bar import Bar
 
 
 def getArgs() -> Namespace:
@@ -13,7 +19,7 @@ def getArgs() -> Namespace:
         "--input",
         type=Path,
         required=True,
-        help="Path to CSV file to count repositories",
+        help="Path to CSV file to count repositories OR directory containing CSVs",
     )
     return parser.parse_args()
 
@@ -23,14 +29,44 @@ def groupByRepository(df: DataFrame) -> DataFrameGroupBy:
     return dfgb
 
 
+def plot(df: DataFrame, outputFilePath: Path) -> None:
+    df.plot(kind="bar")
+
+    plt.tight_layout()
+    plt.savefig(outputFilePath)
+
+
 def main() -> None:
     args: Namespace = getArgs()
 
-    df: DataFrame = pandas.read_csv(filepath_or_buffer=args.input)
+    if isdir(s=args.input):
+        data: dict[str, List[str | int]] = {"library": [], "projectCount": []}
 
-    dfgb: DataFrameGroupBy = groupByRepository(df=df)
+        fileList: List[Path] = [Path(args.input, f) for f in listdir(path=args.input)]
 
-    print(f"Project count: {dfgb.ngroups}")
+        with Bar("Counting projects per CSV file... ", max=len(fileList)) as bar:
+            file: Path
+            for file in fileList:
+                data["library"].append(file.stem)
+
+                df: DataFrame = pandas.read_csv(filepath_or_buffer=file)
+                dfgb: DataFrameGroupBy = groupByRepository(df=df)
+                data["projectCount"].append(dfgb.ngroups)
+
+                bar.next()
+
+        df: DataFrame = DataFrame(data=data).sort_values(
+            by="projectCount", ignore_index=True
+        )
+        df.to_csv(path_or_buf="projectCountOfAllCSVs.csv", index=False)
+
+        plot(df=df, outputFilePath=Path("test.png"))
+
+    else:
+        df: DataFrame = pandas.read_csv(filepath_or_buffer=args.input)
+        dfgb: DataFrameGroupBy = groupByRepository(df=df)
+
+        print(f"Project count: {dfgb.ngroups}")
 
 
 if __name__ == "__main__":
