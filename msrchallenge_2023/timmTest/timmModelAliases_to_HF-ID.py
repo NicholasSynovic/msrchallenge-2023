@@ -40,6 +40,11 @@ def getHFModels(modelNames: List[str]) -> dict[str, str | None]:
     help="Path to JSON file to save data to",
 )
 def main(outputJSON) -> None:
+    """
+    Tool to map timm model aliases (i.e 'resnet50') to Hugging Face IDs (i.e timm/resnet50.a1_in1k)
+
+    """
+
     genericModels: List[str] = list_models(pretrained=False)
     pretrainedModels: List[str] = list_models(pretrained=True)
 
