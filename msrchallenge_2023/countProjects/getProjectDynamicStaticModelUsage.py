@@ -73,6 +73,8 @@ def countDynamicModelUsageRepositories(
         ]
     """
 
+    top5Repos: DataFrame = DataFrame(data={"project":[], "count": []})
+
     totalNumberOfRepos: int = dfgb.ngroups
     dynamicUsageRepos: int = 0
     staticUsageRepos: int = 0
@@ -97,7 +99,14 @@ def countDynamicModelUsageRepositories(
             if (countValid >= 1) and (countNaN == 0):
                 pureStaticUsageRepos += 1
 
+            top5Repos.loc[-1] = (df["repository"].iloc[0], countNaN)
+            top5Repos.index = top5Repos.index + 1
+            top5Repos.sort_index()
+
             bar.next()
+
+    top5Repos.sort_values(by="count", ignore_index=True, inplace=True)
+    top5Repos.to_csv(path_or_buf="projectOrderByDynamicModelUsage.csv", index=False)
 
     percentDynamicUsage: float = (dynamicUsageRepos / totalNumberOfRepos) * 100
     percentStaticUsage: float = (staticUsageRepos / totalNumberOfRepos) * 100
