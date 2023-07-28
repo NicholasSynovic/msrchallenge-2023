@@ -1,3 +1,6 @@
+import logging
+from pathlib import Path
+
 import click
 import timm
 
@@ -19,8 +22,24 @@ import timm
     is_flag=True,
     help="Load pretrained weights of the model",
 )
-def main(modelName: str, usePTM: bool) -> None:
-    print(modelName, usePTM)
+@click.option(
+    "logFile",
+    "-l",
+    "--log-file",
+    type=Path,
+    nargs=1,
+    required=True,
+    help="Path to file to save timm debug logs to",
+)
+def main(modelName: str, usePTM: bool, logFile: Path) -> None:
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
+        filename=logFile,
+    )
+
+    timm.create_model(model_name=modelName, pretrained=usePTM)
 
 
 if __name__ == "__main__":
