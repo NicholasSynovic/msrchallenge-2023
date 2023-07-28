@@ -1,6 +1,7 @@
 matplotlib
 pandas
 progress
+timm
 torch
 torchaudio
 torchtext
