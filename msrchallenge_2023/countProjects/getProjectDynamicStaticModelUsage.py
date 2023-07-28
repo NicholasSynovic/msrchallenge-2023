@@ -73,7 +73,7 @@ def countDynamicModelUsageRepositories(
         ]
     """
 
-    top5Repos: DataFrame = DataFrame(data={"project":[], "count": []})
+    top5Repos: DataFrame = DataFrame(data={"project": [], "count": []})
 
     totalNumberOfRepos: int = dfgb.ngroups
     dynamicUsageRepos: int = 0
@@ -175,7 +175,7 @@ def main() -> None:
         df: DataFrame = DataFrame(data=dataDict).sort_values(
             by="projectCount", ignore_index=True
         )
-        
+
         df.to_csv(path_or_buf=args.output, index=False)
 
     else:

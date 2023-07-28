@@ -93,7 +93,11 @@ def groupBy(df: DataFrame, values: List[Tuple[int, int]]) -> List[DataFrame]:
     return dfList
 
 
-def plot(dfs: List[DataFrame], xAxis_Groups: List[Tuple[int, int]], output: Path,) -> None:
+def plot(
+    dfs: List[DataFrame],
+    xAxis_Groups: List[Tuple[int, int]],
+    output: Path,
+) -> None:
     pairs: List[Tuple[Tuple[int, int], DataFrame]] = list(zip(xAxis_Groups, dfs))
 
     data: dict[str, int] = {
