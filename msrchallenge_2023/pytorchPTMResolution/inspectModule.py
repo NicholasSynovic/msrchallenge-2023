@@ -1,5 +1,7 @@
 import inspect
 from enum import EnumMeta
+from json import dump
+from pathlib import Path
 from types import MappingProxyType, ModuleType
 from typing import Any, List, Tuple
 
@@ -19,7 +21,7 @@ def getListOfWeights(module: Any) -> List[EnumMeta]:
 
     with Bar(f"Extracting weight instances from module... ", max=len(tempData)) as bar:
         for name, class_ in tempData:
-            if "_Weights" in name:
+            if ("_Weights" in name) or ("_QuantizedWeights" in name):
                 data.append(class_)
             bar.next()
 
@@ -57,6 +59,12 @@ def extractInformation(weightClass: List[EnumMeta]) -> List[dict]:
     return data
 
 
+def writeToJSON(data: List[dict], jsonFilepath: str) -> None:
+    with open(file=jsonFilepath, mode="w") as jsonFile:
+        dump(obj=data, fp=jsonFile, indent=4)
+        jsonFile.close()
+
+
 def main() -> None:
     models: ModuleType = torchvision.models
     quantization: ModuleType = torchvision.models.quantization
@@ -82,19 +90,41 @@ def main() -> None:
         weightClass=weightClass_Models,
     )
     metadata_Detection: List[dict] = extractInformation(
-        weightClass=weightClass_Models,
+        weightClass=weightClass_Detection,
     )
     metadata_Video: List[dict] = extractInformation(
-        weightClass=weightClass_Models,
+        weightClass=weightClass_Video,
     )
     metadata_Quantization: List[dict] = extractInformation(
-        weightClass=weightClass_Models,
+        weightClass=weightClass_Quantization,
     )
     metadata_Segmentation: List[dict] = extractInformation(
-        weightClass=weightClass_Models,
+        weightClass=weightClass_Segmentation,
     )
     metadata_OpticalFlow: List[dict] = extractInformation(
-        weightClass=weightClass_Models,
+        weightClass=weightClass_OpticalFlow,
+    )
+
+    writeToJSON(data=metadata_Models, jsonFilepath="tochvision.models.json")
+    writeToJSON(
+        data=metadata_Detection,
+        jsonFilepath="torchvision.models.detection.json",
+    )
+    writeToJSON(
+        data=metadata_Video,
+        jsonFilepath="torchvision.models.video.json",
+    )
+    writeToJSON(
+        data=metadata_Quantization,
+        jsonFilepath="torchvision.models.quantization.json",
+    )
+    writeToJSON(
+        data=metadata_Segmentation,
+        jsonFilepath="torchvision.models.segmentation.json",
+    )
+    writeToJSON(
+        data=metadata_OpticalFlow,
+        jsonFilepath="torchvision.models.optical_flow.json",
     )
 
 
