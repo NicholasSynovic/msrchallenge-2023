@@ -105,8 +105,8 @@ def countDynamicModelUsageRepositories(
 
             bar.next()
 
-    top5Repos.sort_values(by="count", ignore_index=True, inplace=True)
-    top5Repos.to_csv(path_or_buf="projectOrderByDynamicModelUsage.csv", index=False)
+    # top5Repos.sort_values(by="count", ignore_index=True, inplace=True)
+    # top5Repos.to_csv(path_or_buf="projectOrderByDynamicModelUsage.csv", index=False)
 
     percentDynamicUsage: float = (dynamicUsageRepos / totalNumberOfRepos) * 100
     percentStaticUsage: float = (staticUsageRepos / totalNumberOfRepos) * 100
