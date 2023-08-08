@@ -154,6 +154,7 @@ def main() -> None:
     )
 
     df: DataFrame = getDownloadsPerModel(models=relevantModels, modelMetadata=jsonDF)
+    df.to_csv(path_or_buf="modelUsageByDownloadCount.csv", index=False)
 
     groups: List[DataFrame] = groupBy(df=df, values=GROUPING_VALUES)
 
