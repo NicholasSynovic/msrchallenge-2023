@@ -15,7 +15,7 @@ def plot(df: DataFrame, outputFilePath: Path) -> None:
         y="projectCount",
         logy=True,
         legend=None,
-        figsize=(10, 5),
+        figsize=(6.8, 4.8),
     )
 
     plt.ylabel(ylabel="# of Projects", fontsize=labelFontSize)
@@ -37,7 +37,7 @@ def plot(df: DataFrame, outputFilePath: Path) -> None:
             f"{height}",
             xy=(bar.get_x() + bar.get_width() / 2, height),
             xytext=(0, 1),
-            fontsize=10,
+            fontsize="small",
             textcoords="offset points",
             ha="center",
             va="bottom",
@@ -45,7 +45,7 @@ def plot(df: DataFrame, outputFilePath: Path) -> None:
 
     plt.margins(y=0.08, tight=True)
     plt.tight_layout()
-    plt.xlim(left=-0.8)
+    plt.xlim(left=-1)
     plt.savefig(outputFilePath)
 
 
